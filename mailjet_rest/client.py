@@ -11,6 +11,13 @@ from .utils.version import get_version
 requests.packages.urllib3.disable_warnings()
 
 
+def json_encode_any(obj):
+    try:
+        return str(obj)
+    except:
+        raise TypeError(repr(obj) + ' is not JSON serializable')
+
+
 class Config(object):
     API_URL = 'https://api.mailjet.com/'
     API_REF = 'http://dev.mailjet.com/email-api/v3/'
@@ -58,12 +65,12 @@ class Endpoint(object):
 
     def create(self, data=None, filters=None, id=None, action_id=None, **kwargs):
         if self.headers['Content-type'] == 'application/json':
-            data = json.dumps(data)
+            data = json.dumps(data, default=json_encode_any)
         return api_call(self._auth, 'post', self._url, headers=self.headers, resource_id=id, data=data, action=self.action, action_id=action_id, filters=filters, **kwargs)
 
     def update(self, id, data, filters=None, action_id=None, **kwargs):
         if self.headers['Content-type'] == 'application/json':
-            data = json.dumps(data)
+            data = json.dumps(data, default=json_encode_any)
         return api_call(self._auth, 'put', self._url, resource_id=id, headers=self.headers, data=data, action=self.action, action_id=action_id, filters=filters, **kwargs)
 
     def delete(self, id, **kwargs):
